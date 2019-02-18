@@ -17,4 +17,5 @@ class Product < ApplicationRecord
   has_many :favorites
 
   validates :images, length: {maximum: MAX_IMAGE_CREATE_LENGTH}
+  accepts_nested_attributes_for :images
 end

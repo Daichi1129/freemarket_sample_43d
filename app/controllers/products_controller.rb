@@ -1,5 +1,7 @@
 class ProductsController < ApplicationController
 
+before_action :authenticate_user!, except: [:index]
+
   def index
     @ladys = Product.where(category_id:"1").order('id DESC').limit(4)
     @mens = Product.where(category_id:"2").order('id DESC').limit(4)
@@ -8,6 +10,9 @@ class ProductsController < ApplicationController
   end
 
   def new
+    @products = Product.new
+    @products.images.new
+    # @categories = Category.find_by(parent_id: 0)
   end
 
   def show
@@ -28,10 +33,49 @@ class ProductsController < ApplicationController
   end
 
   def buy_confirm
+    @product = Product.find(params[:id])
+    @user = User.find(current_user.id)
+    @token = @user.token_id
+    if @token.present?
+      Payjp.api_key = PAYJP_SECRET_KEY
+      @cards = Payjp::Token.retrieve(@token)
+    end
+  end
+
+  def buy
+    @product = Product.find(params[:id])
+    @user = User.find(current_user.id)
+    Payjp.api_key = PAYJP_SECRET_KEY
+    charge = Payjp::Charge.create(
+    amount: @product.price,
+    customer: @user.customer_id,
+    currency: 'jpy',
+    )
+    @product.update(product_state_id: 2)
+    redirect_to action: 'index'
   end
 
   def search
     @products = Product.where('title LIKE(?)', "%#{params[:keyword]}%")
   end
+
+  def create
+    @products = Product.create(products_params)
+    redirect_to action: 'index'
+  end
+
+  def brand_search
+    @brands = Brand.where('name LIKE(?)', "#{params[:keyword]}%")
+    # binding.pry
+    respond_to do |format|
+      format.json
+    end
+  end
+
+  private
+
+    def products_params
+       params.require(:product).permit(:product_state_id, :title, :product_old_id, :deliveryfee_id, :area_id, :price, :product_introduce, :shipment_id, :user_id, :brand_id, :size_id, :category_id, :deliveryday_id, images_attributes:[:image_url])
+    end
 
 end
