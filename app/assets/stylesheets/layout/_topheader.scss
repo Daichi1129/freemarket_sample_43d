@@ -236,6 +236,14 @@
   display:block;
 }
 
+.submenu-trigger:hover >a{
+  color:#00CCFF;
+}
+
+.submenu-trigger-brand:hover >a{
+  color:#00CCFF;
+}
+
 .submenu-trigger-brand{
   position:relative;
   width:126px;

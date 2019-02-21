@@ -1,6 +1,7 @@
 class UsersController < ApplicationController
 
 before_action :authenticate_user!, except: [:create, :signininformation, :signinphonenumber, :signinlocation, :signincredit, :signincomplete]
+protect_from_forgery except: [:show, :delete,:save]
 require "payjp"
 
   def index
@@ -81,7 +82,7 @@ require "payjp"
   end
 
   def lists
-    @selllists = Product.where(user_id:"1")
+    @selllists = Product.where(user_id:current_user.id)
   end
 
 
